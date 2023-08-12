@@ -1,29 +1,28 @@
-import RPi.GPIO as GPIO
-import time
-import Encoder
+from RPi import GPIO
+from time import sleep
 
-# Set up the GPIO mode
+clk = 16
+dt = 18
+
 GPIO.setmode(GPIO.BCM)
+GPIO.setup(clk, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(dt, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-# Define the GPIO pins for the rotary encoders
-ENCODER1_PIN_A = 16
-ENCODER1_PIN_B = 18
-ENCODER2_PIN_A = 28
-ENCODER2_PIN_B = 26
-
-enc_1 = Encoder.Encoder(ENCODER1_PIN_A, ENCODER1_PIN_B)
-enc_2 = Encoder.Encoder(ENCODER2_PIN_A, ENCODER2_PIN_B)
-
-enc_1_prev = enc_1.read()
-enc_2_prev = enc_2.read()
+counter = 0
+clkLastState = GPIO.input(clk)
 
 try:
-    while True:
-        print(enc_1.read())
-        time.sleep(3)
 
-except KeyboardInterrupt:
-    print("Exiting...")
+    while True:
+        clkState = GPIO.input(clk)
+        dtState = GPIO.input(dt)
+        if clkState != clkLastState:
+            if dtState != clkState:
+                counter += 1
+            else:
+                counter -= 1
+            print counter
+        clkLastState = clkState
+        sleep(0.2)
 finally:
-    # Clean up GPIO on program exit
     GPIO.cleanup()
